@@ -16,7 +16,6 @@ const Navbar = ({ hideSearchBar = false }) => {
   const userData = useSelector((store) => store.user.user);
 
   async function getUserData() {
-    console.log("getUserData");
     const res = await fetch(getUser, {
       method: "GET",
       headers: {
@@ -34,8 +33,6 @@ const Navbar = ({ hideSearchBar = false }) => {
     if (userData) return;
     getUserData();
   }, []);
-
-  // console.log("Navbar", userData);
 
   const light =
     "h-12 w-screen border-2 border-blue-300 bg-blue-300 flex items-center justify-around";

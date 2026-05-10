@@ -68,7 +68,7 @@ const Signup = () => {
       return;
     }
     setIsLoading(true);
-    // console.log("Form State ", formState);
+   
     try {
       const url = isSignup ? signupUrl : loginUrl;
       const apiData = await fetch(url, {
