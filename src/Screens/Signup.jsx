@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import Navbar from "../Components/Navbar";
-import { signupUrl } from "../Constants";
-
+import { signupUrl, loginUrl } from "../Constants";
+import { useDispatch } from "react-redux";
+import { setUser } from "../app/UserSlice";
+import { useNavigate } from "react-router-dom";
 const signupText = {
   infoText: "Already a user",
   buttonText: "Login",
@@ -14,11 +16,14 @@ const loginText = {
 };
 
 const Signup = () => {
+  const dispatch = useDispatch();
   const [isSignup, setIsSignup] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const { infoText, buttonText, buttonText2 } = isSignup
     ? signupText
     : loginText;
+
+  const navigate = useNavigate();
 
   const [formState, setFormState] = useState({
     name: "",
@@ -63,9 +68,10 @@ const Signup = () => {
       return;
     }
     setIsLoading(true);
-    console.log("Form State ", formState);
+    // console.log("Form State ", formState);
     try {
-      const apiData = await fetch(signupUrl, {
+      const url = isSignup ? signupUrl : loginUrl;
+      const apiData = await fetch(url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -75,15 +81,36 @@ const Signup = () => {
       });
       const jsonData = await apiData.json();
       console.log(jsonData);
+      const error = jsonData.error;
+      if (error) {
+        setError({
+          error: error,
+        });
+      } else {
+        dispatch(setUser(jsonData.res));
+        navigate("/");
+        setFormState({
+          name: "",
+          email: "",
+          password: "",
+        });
+        setError({
+          emailError: null,
+          passwordError: null,
+          error: null,
+        });
+      }
     } catch (err) {
       console.log(JSON.stringify(err));
     } finally {
+      setTimeout(() => {
+        setError({
+          emailError: null,
+          passwordError: null,
+          error: null,
+        });
+      }, 3000);
       setIsLoading(false);
-    }
-  };
-  const login = () => {
-    if (!checkValidation()) {
-      return;
     }
   };
 
@@ -143,12 +170,7 @@ const Signup = () => {
           ) : (
             <></>
           )}
-          <button
-            onClick={() => {
-              isSignup ? signup() : login();
-            }}
-            className="btn  mt-3 w-2/4"
-          >
+          <button onClick={signup} className="btn  mt-3 w-2/4">
             {isLoading ? (
               <span className="loading loading-spinner"></span>
             ) : (
@@ -160,6 +182,11 @@ const Signup = () => {
             <button
               onClick={() => {
                 setIsSignup(!isSignup);
+                setFormState({
+                  name: "",
+                  email: "",
+                  password: "",
+                });
               }}
               className="text-blue-300 ml-2"
             >
